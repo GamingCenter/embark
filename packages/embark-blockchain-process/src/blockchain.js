@@ -468,9 +468,20 @@ export function BlockchainClient(userConfig, options) {
     case constants.blockchain.clients.parity:
       clientClass = ParityClient;
       break;
-    default:
-      console.error(__('Unknown client "%s". Please use one of the following: %s', userConfig.client, Object.keys(constants.blockchain.clients).join(', ')));
-      process.exit(1);
+    default: {
+      // check for blockchain plugins
+      const blockchainPlugins = options.blockchainPlugins;
+      if(!blockchainPlugins || !blockchainPlugins.length) {
+        console.error(__('Unknown client "%s". Please use one of the following: %s', userConfig.client, Object.keys(constants.blockchain.clients).join(', ')));
+        process.exit(1);
+      }
+      const blockchainPlugin = blockchainPlugins[0];
+      if(blockchainPlugins.length > 1) {
+        this.logger.warn(__(`Multiple blockchain plugins have been registered: '${blockchainPlugins.map((bc) => bc.name).join("', '")}', using '${blockchainPlugin.name}'`));
+      }
+      clientClass = require(blockchainPlugin.clientPath);
+    }
+      
   }
   userConfig.isDev = (userConfig.isDev || userConfig.default);
   userConfig.env = options.env;

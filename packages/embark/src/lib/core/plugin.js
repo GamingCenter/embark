@@ -28,6 +28,7 @@ var Plugin = function(options) {
   this.dappGenerators = [];
   this.pluginTypes = [];
   this.uploadCmds = [];
+  this.blockchains = [];
   this.apiCalls = [];
   this.imports = [];
   this.embarkjs_code = [];
@@ -226,6 +227,11 @@ Plugin.prototype.registerCompiler = function(extension, cb) {
 Plugin.prototype.registerUploadCommand = function(cmd, cb) {
   this.uploadCmds.push({cmd: cmd, cb: cb});
   this.addPluginType('uploadCmds');
+};
+
+Plugin.prototype.registerBlockchain = function(name, clientPath) {
+  this.blockchains.push({name, clientPath});
+  this.addPluginType('blockchains');
 };
 
 Plugin.prototype.addCodeToEmbarkJS = function(code) {

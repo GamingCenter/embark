@@ -40,7 +40,8 @@ export class BlockchainProcessLauncher {
         isDev: this.isDev,
         locale: this.locale,
         certOptions: this.embark.config.webServerConfig.certOptions,
-        events: this.events
+        events: this.events,
+        blockchainPlugins: this.embark.config.plugins.getPluginsProperty("blockchains", "blockchains")
       }
     });
 
