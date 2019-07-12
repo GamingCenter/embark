@@ -27,6 +27,7 @@ var Blockchain = function(userConfig, clientClass) {
   this.proxyIpc = null;
   this.isStandalone = userConfig.isStandalone;
   this.certOptions = userConfig.certOptions;
+  this.isCustomPlugin = userConfig.isCustomPlugin;
 
 
   let defaultWsApi = clientClass.DEFAULTS.WS_API;
@@ -346,6 +347,9 @@ Blockchain.prototype.initDevChain = function(callback) {
     // Create other accounts
     async.waterfall([
       function listAccounts(next) {
+        if(self.isCustomPlugin && !self.client.CLI_FEATURE_SUPPORT.LIST_ACCOUNTS) {
+          return next();
+        }
         self.runCommand(self.client.listAccountsCommand(), {}, (err, stdout, _stderr) => {
           if (err || stdout === undefined || stdout.indexOf("Fatal") >= 0) {
             console.log(__("no accounts found").green);
@@ -363,6 +367,9 @@ Blockchain.prototype.initDevChain = function(callback) {
         });
       },
       function newAccounts(accountsToCreate, next) {
+        if(self.isCustomPlugin && !self.client.CLI_FEATURE_SUPPORT.CREATE_ACCOUNTS) {
+          return next();
+        }
         var accountNumber = 0;
         async.whilst(
           function() {
@@ -408,6 +415,9 @@ Blockchain.prototype.initChainAndGetAddress = function (callback) {
       });
     },
     function listAccounts(next) {
+      if(self.isCustomPlugin && !self.client.CLI_FEATURE_SUPPORT.LIST_ACCOUNTS) {
+        return next();
+      }
       self.runCommand(self.client.listAccountsCommand(), {}, (err, stdout, _stderr) => {
         if (err || stdout === undefined || stdout.indexOf("Fatal") >= 0) {
           self.logger.info(__("no accounts found").green);
@@ -425,7 +435,8 @@ Blockchain.prototype.initChainAndGetAddress = function (callback) {
     },
     function genesisBlock(next) {
       //There's no genesis init with Parity. Custom network are set in the chain property at startup
-      if (!self.config.genesisBlock || self.client.name === constants.blockchain.clients.parity) {
+      if (!self.config.genesisBlock || self.client.name === constants.blockchain.clients.parity || 
+        (self.isCustomPlugin && !self.client.CLI_FEATURE_SUPPORT.GENESIS_FILE)) {
         return next();
       }
       self.logger.info(__("initializing genesis block").green);
@@ -434,6 +445,9 @@ Blockchain.prototype.initChainAndGetAddress = function (callback) {
       });
     },
     function newAccount(next) {
+      if(self.isCustomPlugin && !self.client.CLI_FEATURE_SUPPORT.CREATE_ACCOUNTS) {
+        return next();
+      }
       self.runCommand(self.client.newAccountCommand(), {}, (err, stdout, _stderr) => {
         if (err) {
           return next(err);
@@ -460,6 +474,7 @@ export function BlockchainClient(userConfig, options) {
   if (options.clientName) userConfig.client = options.clientName;
   // Choose correct client instance based on clientName
   let clientClass;
+  userConfig.isCustomPlugin = false;
   switch (userConfig.client) {
     case constants.blockchain.clients.geth:
       clientClass = GethClient;
@@ -477,9 +492,10 @@ export function BlockchainClient(userConfig, options) {
       }
       const blockchainPlugin = blockchainPlugins[0];
       if(blockchainPlugins.length > 1) {
-        this.logger.warn(__(`Multiple blockchain plugins have been registered: '${blockchainPlugins.map((bc) => bc.name).join("', '")}', using '${blockchainPlugin.name}'`));
+        options.logger.warn(__(`Multiple blockchain plugins have been registered: '${blockchainPlugins.map((bc) => bc.name).join("', '")}', using '${blockchainPlugin.name}'`));
       }
       clientClass = require(blockchainPlugin.clientPath);
+      userConfig.isCustomPlugin = true;
     }
       
   }
