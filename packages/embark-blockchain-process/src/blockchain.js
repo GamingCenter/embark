@@ -348,12 +348,13 @@ Blockchain.prototype.initDevChain = function(callback) {
     async.waterfall([
       function listAccounts(next) {
         if(self.isCustomPlugin && !self.client.CLI_FEATURE_SUPPORT.LIST_ACCOUNTS) {
-          return next();
+          self.logger.warn(__("Cannot list accounts because the custom blockchain being used does not support this function. To remove this warning, remove the 'accounts.numAccounts' property from your DApp's blockchain config."));
+          return next(null, null);
         }
         self.runCommand(self.client.listAccountsCommand(), {}, (err, stdout, _stderr) => {
           if (err || stdout === undefined || stdout.indexOf("Fatal") >= 0) {
-            console.log(__("no accounts found").green);
-            return next();
+            self.logger.log(__("no accounts found").green);
+            return next(null, null);
           }
           // List current addresses
           self.config.unlockAddressList = self.client.parseListAccountsCommandResultToAddressList(stdout);
@@ -368,6 +369,7 @@ Blockchain.prototype.initDevChain = function(callback) {
       },
       function newAccounts(accountsToCreate, next) {
         if(self.isCustomPlugin && !self.client.CLI_FEATURE_SUPPORT.CREATE_ACCOUNTS) {
+          self.logger.warn(__("Cannot create accounts because the custom blockchain being used does not support this function. To remove this warning, remove the 'accounts.numAccounts' property from your DApp's blockchain config."));
           return next();
         }
         var accountNumber = 0;
