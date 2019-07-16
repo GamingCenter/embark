@@ -104,7 +104,7 @@ class EmbarkWeb3 {
 
   generateSymlink(location) {
     return new Promise((resolve, reject) => {
-      this.events.request('code-generator:artifact:symlink:generate', location, 'web3', (err, symlinkDest) => {
+      this.events.request('code-generator:symlink:generate', location, 'web3', (err, symlinkDest) => {
         if (err) {
           return reject(err);
         }

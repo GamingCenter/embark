@@ -157,7 +157,7 @@ class IPFS {
         return this.logger.error(err.message || err);
       }
       this.events.request('code-generator:ready', () => {
-        this.events.request('code-generator:artifact:symlink:generate', location, 'ipfs-api', (err, _symlinkDest) => {
+        this.events.request('code-generator:symlink:generate', location, 'ipfs-api', (err, _symlinkDest) => {
           if (err) {
             this.logger.error(__('Error creating a symlink to IPFS API'));
             return this.logger.error(err.message || err);
