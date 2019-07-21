@@ -365,7 +365,8 @@ Config.prototype.loadBlockchainConfigFile = function() {
     (/rinkeby|testnet|livenet/).test(this.blockchainConfig.networkType) &&
     !(this.blockchainConfig.accounts && this.blockchainConfig.accounts.find(acc => acc.password)) &&
     !this.blockchainConfig.isDev &&
-    this.env !== 'development' && this.env !== 'test') {
+    this.env !== 'development' && this.env !== 'test' &&
+    this.blockchainConfig.client === 'geth') {
     this.logger.warn((
       '\n=== ' + __('Cannot unlock account - account config missing').bold + ' ===\n' +
       __('Geth is configured to sync to a testnet/livenet and needs to unlock an account ' +
@@ -374,10 +375,8 @@ Config.prototype.loadBlockchainConfigFile = function() {
         'a valid address and password: \n') +
       ` - config/blockchain.js > ${this.env} > account\n\n`.italic +
       __('Please also make sure the keystore file for the account is located at: ') +
-      '\n - Mac: ' + `~/Library/Ethereum/${this.env}/keystore`.italic +
-      '\n - Linux: ' + `~/.ethereum/${this.env}/keystore`.italic +
-      '\n - Windows: ' + `%APPDATA%\\Ethereum\\${this.env}\\keystore`.italic) +
-      __('\n\nAlternatively, you could change ' +
+      `\n  ${this.blockchainConfig.datadir}/keystore`.italic +
+      __('\n\nAlternatively, you could change ') +
         `config/blockchain.js > ${this.env} > networkType`.italic +
         __(' to ') +
         '"custom"\n'.italic).yellow
