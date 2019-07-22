@@ -362,10 +362,6 @@ Blockchain.prototype.initDevChain = function(callback) {
     // Create other accounts
     async.waterfall([
       function listAccounts(next) {
-        if(self.isCustomPlugin && !self.client.CLI_FEATURE_SUPPORT.LIST_ACCOUNTS) {
-          console.warn(__("Cannot list accounts because the custom blockchain being used does not support this function. To remove this warning, remove the 'accounts.numAccounts' property from your DApp's blockchain config."));
-          return next(null, null);
-        }
         self.runCommand(self.client.listAccountsCommand(), {}, (err, stdout, _stderr) => {
           if (err || stdout === undefined || stdout.indexOf("Fatal") >= 0) {
             self.logger.log(__("no accounts found").green);
@@ -383,10 +379,6 @@ Blockchain.prototype.initDevChain = function(callback) {
         });
       },
       function newAccounts(accountsToCreate, next) {
-        if(self.isCustomPlugin && !self.client.CLI_FEATURE_SUPPORT.CREATE_ACCOUNTS) {
-          console.warn(__("Cannot create accounts because the custom blockchain being used does not support this function. To remove this warning, remove the 'accounts.numAccounts' property from your DApp's blockchain config."));
-          return next();
-        }
         var accountNumber = 0;
         async.whilst(
           function() {
@@ -432,9 +424,6 @@ Blockchain.prototype.initChainAndGetAddress = function (callback) {
       });
     },
     function listAccounts(next) {
-      if(self.isCustomPlugin && !self.client.CLI_FEATURE_SUPPORT.LIST_ACCOUNTS) {
-        return next();
-      }
       self.runCommand(self.client.listAccountsCommand(), {}, (err, stdout, _stderr) => {
         if (err || stdout === undefined || stdout.indexOf("Fatal") >= 0) {
           self.logger.info(__("no accounts found").green);
@@ -452,8 +441,7 @@ Blockchain.prototype.initChainAndGetAddress = function (callback) {
     },
     function genesisBlock(next) {
       //There's no genesis init with Parity. Custom network are set in the chain property at startup
-      if (!self.config.genesisBlock || self.client.name === constants.blockchain.clients.parity || 
-        (self.isCustomPlugin && !self.client.CLI_FEATURE_SUPPORT.GENESIS_FILE)) {
+      if (!self.config.genesisBlock || self.client.name === constants.blockchain.clients.parity) {
         return next();
       }
       self.logger.info(__("initializing genesis block").green);
