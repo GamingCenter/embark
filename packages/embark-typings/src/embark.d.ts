@@ -42,3 +42,5 @@ export interface Embark {
     action: (callback: () => void) => void,
   ): void;
 }
+
+export type Environment = String;

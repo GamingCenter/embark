@@ -29,23 +29,19 @@ var Blockchain = function(userConfig, clientClass) {
   this.certOptions = userConfig.certOptions;
   this.isCustomPlugin = userConfig.isCustomPlugin;
 
-
-  let defaultWsApi = clientClass.DEFAULTS.WS_API;
-  if (this.isDev) defaultWsApi = clientClass.DEFAULTS.DEV_WS_API;
-
   this.config = {
     silent: this.userConfig.silent,
     client: this.userConfig.client,
     ethereumClientBin: this.userConfig.ethereumClientBin || this.userConfig.client,
-    networkType: this.userConfig.networkType || clientClass.DEFAULTS.NETWORK_TYPE,
-    networkId: this.userConfig.networkId || clientClass.DEFAULTS.NETWORK_ID,
+    networkType: this.userConfig.networkType,
+    networkId: this.userConfig.networkId,
     genesisBlock: this.userConfig.genesisBlock || false,
     datadir: this.userConfig.datadir,
     mineWhenNeeded: this.userConfig.mineWhenNeeded || false,
     rpcHost: dockerHostSwap(this.userConfig.rpcHost) || defaultHost,
     rpcPort: this.userConfig.rpcPort || 8545,
     rpcCorsDomain: this.userConfig.rpcCorsDomain || false,
-    rpcApi: this.userConfig.rpcApi || clientClass.DEFAULTS.RPC_API,
+    rpcApi: this.userConfig.rpcApi,
     port: this.userConfig.port || 30303,
     nodiscover: this.userConfig.nodiscover || false,
     mine: this.userConfig.mine || false,
@@ -57,7 +53,7 @@ var Blockchain = function(userConfig, clientClass) {
     wsHost: dockerHostSwap(this.userConfig.wsHost) || defaultHost,
     wsPort: this.userConfig.wsPort || 8546,
     wsOrigins: this.userConfig.wsOrigins || false,
-    wsApi: this.userConfig.wsApi || defaultWsApi,
+    wsApi: this.userConfig.wsApi,
     vmdebug: this.userConfig.vmdebug || false,
     targetGasLimit: this.userConfig.targetGasLimit || false,
     syncMode: this.userConfig.syncMode || this.userConfig.syncmode,

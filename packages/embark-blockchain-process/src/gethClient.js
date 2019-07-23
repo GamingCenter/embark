@@ -7,32 +7,35 @@ const GethMiner = require('./miner');
 const semver = require('semver');
 const constants = require('embark-core/constants');
 
-const DEFAULTS = {
-  "BIN": "geth",
-  "VERSIONS_SUPPORTED": ">=1.8.14",
-  "NETWORK_TYPE": "custom",
-  "NETWORK_ID": 1337,
-  "RPC_API": ['eth', 'web3', 'net', 'debug', 'personal'],
-  "WS_API": ['eth', 'web3', 'net', 'shh', 'debug', 'pubsub', 'personal'],
-  "DEV_WS_API": ['eth', 'web3', 'net', 'shh', 'debug', 'pubsub', 'personal'],
-  "TARGET_GAS_LIMIT": 8000000
-};
-
 // TODO: make all of this async
 class GethClient {
-
-  static get DEFAULTS() {
-    return DEFAULTS;
-  }
-
   constructor(options) {
+    this.DEFAULTS = {
+      "BIN": "geth",
+      "VERSIONS_SUPPORTED": ">=1.8.14",
+      "NETWORK_TYPE": "custom",
+      "NETWORK_ID": 1337,
+      "RPC_API": ['eth', 'web3', 'net', 'debug', 'personal'],
+      "WS_API": ['eth', 'web3', 'net', 'shh', 'debug', 'pubsub', 'personal'],
+      "DEV_WS_API": ['eth', 'web3', 'net', 'shh', 'debug', 'pubsub', 'personal'],
+      "TARGET_GAS_LIMIT": 8000000
+    };
     this.config = options && options.hasOwnProperty('config') ? options.config : {};
     this.env = options && options.hasOwnProperty('env') ? options.env : 'development';
     this.isDev = options && options.hasOwnProperty('isDev') ? options.isDev : (this.env === 'development');
+    let defaultWsApi = this.DEFAULTS.WS_API;
+    if (this.isDev) {
+      defaultWsApi = this.DEFAULTS.DEV_WS_API;
+    }
+    this.config = options && options.hasOwnProperty('config') ? options.config : {};
+    this.config.networkType = this.config.networkType || this.DEFAULTS.NETWORK_TYPE;
+    this.config.networkId = this.config.networkId || this.DEFAULTS.NETWORK_ID;
+    this.config.rpcApi = this.config.rpcApi || this.DEFAULTS.RPC_API;
+    this.config.wsApi = this.config.wsApi || defaultWsApi;
     this.name = constants.blockchain.clients.geth;
     this.prettyName = "Go-Ethereum (https://github.com/ethereum/go-ethereum)";
-    this.bin = this.config.ethereumClientBin || DEFAULTS.BIN;
-    this.versSupported = DEFAULTS.VERSIONS_SUPPORTED;
+    this.bin = this.config.ethereumClientBin || this.DEFAULTS.BIN;
+    this.versSupported = this.DEFAULTS.VERSIONS_SUPPORTED;
     this.httpReady = false;
     this.wsReady = !this.config.wsRPC;
   }

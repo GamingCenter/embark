@@ -7,33 +7,6 @@ const os = require('os');
 const semver = require('semver');
 const constants = require('embark-core/constants');
 
-const DEFAULTS = {
-  "BIN": "parity",
-  "VERSIONS_SUPPORTED": ">=2.0.0",
-  "NETWORK_TYPE": "dev",
-  "NETWORK_ID": 17,
-  "RPC_API": ["web3", "eth", "pubsub", "net", "parity", "private", "parity_pubsub", "traces", "rpc", "shh", "shh_pubsub"],
-  "WS_API": ["web3", "eth", "pubsub", "net", "parity", "private", "parity_pubsub", "traces", "rpc", "shh", "shh_pubsub"],
-  "DEV_WS_API": ["web3", "eth", "pubsub", "net", "parity", "private", "parity_pubsub", "traces", "rpc", "shh", "shh_pubsub", "personal"],
-  "TARGET_GAS_LIMIT": 8000000,
-  "DEV_ACCOUNT": "0x00a329c0648769a73afac7f9381e08fb43dbea72",
-  "DEV_WALLET": {
-    "id": "d9460e00-6895-8f58-f40c-bb57aebe6c00",
-    "version": 3,
-    "crypto": {
-      "cipher": "aes-128-ctr",
-      "cipherparams": {"iv": "74245f453143f9d06a095c6e6e309d5d"},
-      "ciphertext": "2fa611c4aa66452ef81bd1bd288f9d1ed14edf61aa68fc518093f97c791cf719",
-      "kdf": "pbkdf2",
-      "kdfparams": {"c": 10240, "dklen": 32, "prf": "hmac-sha256", "salt": "73b74e437a1144eb9a775e196f450a23ab415ce2c17083c225ddbb725f279b98"},
-      "mac": "f5882ae121e4597bd133136bf15dcbcc1bb2417a25ad205041a50c59def812a8"
-    },
-    "address": "00a329c0648769a73afac7f9381e08fb43dbea72",
-    "name": "Development Account",
-    "meta": "{\"description\":\"Never use this account outside of development chain!\",\"passwordHint\":\"Password is empty string\"}"
-  }
-};
-
 const safePush = function(set, value) {
   if (set.indexOf(value) === -1) {
     set.push(value);
@@ -42,18 +15,48 @@ const safePush = function(set, value) {
 
 class ParityClient {
 
-  static get DEFAULTS() {
-    return DEFAULTS;
-  }
-
   constructor(options) {
-    this.config = options && options.hasOwnProperty('config') ? options.config : {};
+    this.DEFAULTS = {
+      "BIN": "parity",
+      "VERSIONS_SUPPORTED": ">=2.0.0",
+      "NETWORK_TYPE": "dev",
+      "NETWORK_ID": 17,
+      "RPC_API": ["web3", "eth", "pubsub", "net", "parity", "private", "parity_pubsub", "traces", "rpc", "shh", "shh_pubsub"],
+      "WS_API": ["web3", "eth", "pubsub", "net", "parity", "private", "parity_pubsub", "traces", "rpc", "shh", "shh_pubsub"],
+      "DEV_WS_API": ["web3", "eth", "pubsub", "net", "parity", "private", "parity_pubsub", "traces", "rpc", "shh", "shh_pubsub", "personal"],
+      "TARGET_GAS_LIMIT": 8000000,
+      "DEV_ACCOUNT": "0x00a329c0648769a73afac7f9381e08fb43dbea72",
+      "DEV_WALLET": {
+        "id": "d9460e00-6895-8f58-f40c-bb57aebe6c00",
+        "version": 3,
+        "crypto": {
+          "cipher": "aes-128-ctr",
+          "cipherparams": {"iv": "74245f453143f9d06a095c6e6e309d5d"},
+          "ciphertext": "2fa611c4aa66452ef81bd1bd288f9d1ed14edf61aa68fc518093f97c791cf719",
+          "kdf": "pbkdf2",
+          "kdfparams": {"c": 10240, "dklen": 32, "prf": "hmac-sha256", "salt": "73b74e437a1144eb9a775e196f450a23ab415ce2c17083c225ddbb725f279b98"},
+          "mac": "f5882ae121e4597bd133136bf15dcbcc1bb2417a25ad205041a50c59def812a8"
+        },
+        "address": "00a329c0648769a73afac7f9381e08fb43dbea72",
+        "name": "Development Account",
+        "meta": "{\"description\":\"Never use this account outside of development chain!\",\"passwordHint\":\"Password is empty string\"}"
+      }
+    };
     this.env = options && options.hasOwnProperty('env') ? options.env : 'development';
     this.isDev = options && options.hasOwnProperty('isDev') ? options.isDev : (this.env === 'development');
+    let defaultWsApi = this.DEFAULTS.WS_API;
+    if (this.isDev) {
+      defaultWsApi = this.DEFAULTS.DEV_WS_API;
+    }
+    this.config = options && options.hasOwnProperty('config') ? options.config : {};
+    this.config.networkType = this.config.networkType || this.DEFAULTS.NETWORK_TYPE;
+    this.config.networkId = this.config.networkId || this.DEFAULTS.NETWORK_ID;
+    this.config.rpcApi = this.config.rpcApi || this.DEFAULTS.RPC_API;
+    this.config.wsApi = this.config.wsApi || defaultWsApi;
     this.name = constants.blockchain.clients.parity;
     this.prettyName = "Parity-Ethereum (https://github.com/paritytech/parity-ethereum)";
-    this.bin = this.config.ethereumClientBin || DEFAULTS.BIN;
-    this.versSupported = DEFAULTS.VERSIONS_SUPPORTED;
+    this.bin = this.config.ethereumClientBin || this.DEFAULTS.BIN;
+    this.versSupported = this.DEFAULTS.VERSIONS_SUPPORTED;
   }
 
   isReady(data) {
@@ -293,7 +296,7 @@ class ParityClient {
 
   createDevAccount(keysDataDir, cb) {
     const devAccountWallet = keysDataDir + '/dev.wallet';
-    fs.writeFile(devAccountWallet, JSON.stringify(DEFAULTS.DEV_WALLET), function(err) {
+    fs.writeFile(devAccountWallet, JSON.stringify(this.DEFAULTS.DEV_WALLET), function(err) {
       if (err) {
         return cb(err);
       }
@@ -370,7 +373,7 @@ class ParityClient {
       },
       function accountToUnlock(callback) {
         if (self.isDev) {
-          let unlockAddressList = self.config.unlockAddressList ? self.config.unlockAddressList : DEFAULTS.DEV_ACCOUNT;
+          let unlockAddressList = self.config.unlockAddressList ? self.config.unlockAddressList : this.DEFAULTS.DEV_ACCOUNT;
           args.push("--unlock=" + unlockAddressList);
           return callback(null, "--unlock=" + unlockAddressList);
         }
@@ -392,8 +395,8 @@ class ParityClient {
           return callback(null, "--gas-floor-target=" + config.targetGasLimit);
         }
         // Default Parity gas limit is 4700000: let's set to the geth default
-        args.push("--gas-floor-target=" + DEFAULTS.TARGET_GAS_LIMIT);
-        return callback(null, "--gas-floor-target=" + DEFAULTS.TARGET_GAS_LIMIT);
+        args.push("--gas-floor-target=" + this.DEFAULTS.TARGET_GAS_LIMIT);
+        return callback(null, "--gas-floor-target=" + this.DEFAULTS.TARGET_GAS_LIMIT);
       }
     ], function(err) {
       if (err) {
