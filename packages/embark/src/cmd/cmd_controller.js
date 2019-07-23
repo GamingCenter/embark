@@ -123,6 +123,14 @@ class EmbarkController {
         });
       },
       function (callback) {
+        engine.startService("libraryManager").installAll((err) => {
+          if (err) {
+            return callback(err);
+          }
+          callback();
+        });
+      },
+      function (callback) {
         let pluginList = engine.plugins.listPlugins();
         if (pluginList.length > 0) {
           engine.logger.info(__("loaded plugins") + ": " + pluginList.join(", "));
@@ -133,7 +141,6 @@ class EmbarkController {
         engine.startService("coreProcess");
         engine.startService("blockchainListener");
         engine.startService("serviceMonitor");
-        engine.startService("libraryManager");
         engine.startService("codeRunner");
         engine.startService("pipeline");
         engine.startService("deployment");
@@ -189,6 +196,7 @@ class EmbarkController {
       if (err) {
         engine.logger.error(err.message);
         engine.logger.info(err.stack);
+        process.exit(1);
       } else {
         engine.events.emit('firstDeploymentDone');
       }
@@ -221,6 +229,14 @@ class EmbarkController {
       function initEngine(callback) {
         engine.init({}, callback);
       },
+      function (callback) {
+        engine.startService("libraryManager").installAll((err) => {
+          if (err) {
+            return callback(err);
+          }
+          callback();
+        });
+      },
       function startServices(callback) {
         let pluginList = engine.plugins.listPlugins();
         if (pluginList.length > 0) {
@@ -229,7 +245,6 @@ class EmbarkController {
 
         if (!options.onlyCompile) engine.startService("web3");
         engine.startService("processManager");
-        engine.startService("libraryManager");
         engine.startService("codeRunner");
         engine.startService("pipeline");
         engine.startService("codeGenerator");
@@ -300,6 +315,14 @@ class EmbarkController {
       function initEngine(callback) {
         engine.init({}, callback);
       },
+      function (callback) {
+        engine.startService("libraryManager").installAll((err) => {
+          if (err) {
+            return callback(err);
+          }
+          callback();
+        });
+      },
       function startServices(callback) {
         let pluginList = engine.plugins.listPlugins();
         if (pluginList.length > 0) {
@@ -319,7 +342,6 @@ class EmbarkController {
         engine.startService("processManager");
         engine.startService("coreProcess");
         engine.startService("serviceMonitor");
-        engine.startService("libraryManager");
         engine.startService("pipeline");
         engine.startService("storage");
         engine.startService("cockpit");
@@ -364,6 +386,7 @@ class EmbarkController {
       if (err) {
         engine.logger.error(err.message);
         engine.logger.info(err.stack);
+        process.exit(1);
       } else {
         engine.events.emit('firstDeploymentDone');
       }
@@ -389,6 +412,14 @@ class EmbarkController {
         engine.init({}, callback);
       },
       function (callback) {
+        engine.startService("libraryManager").installAll((err) => {
+          if (err) {
+            return callback(err);
+          }
+          callback();
+        });
+      },
+      function (callback) {
         let pluginList = engine.plugins.listPlugins();
         if (pluginList.length > 0) {
           engine.logger.info(__("loaded plugins") + ": " + pluginList.join(", "));
@@ -396,7 +427,6 @@ class EmbarkController {
 
         engine.startService("processManager");
         engine.startService("serviceMonitor");
-        engine.startService("libraryManager");
         engine.startService("compiler");
         engine.startService("codeGenerator");
         engine.startService("graph");
@@ -408,11 +438,11 @@ class EmbarkController {
         engine.logger.error(err.message);
         engine.logger.info(err.stack);
       } else {
-
         engine.events.request("graph:create", options, () => {
           engine.logger.info(__("Done. %s generated", options.output).underline);
         });
       }
+
       process.exit(err ? 1 : 0);
     });
 
@@ -485,6 +515,14 @@ class EmbarkController {
       function initEngine(callback) {
         engine.init({}, callback);
       },
+      function (callback) {
+        engine.startService("libraryManager").installAll((err) => {
+          if (err) {
+            return callback(err);
+          }
+          callback();
+        });
+      },
       function startServices(callback) {
         engine.startService("scaffolding");
         callback();
@@ -502,7 +540,6 @@ class EmbarkController {
         }
         engine.startService("web3");
         engine.startService("processManager");
-        engine.startService("libraryManager");
         engine.startService("codeRunner");
         engine.startService("deployment", {onlyCompile: true});
 
@@ -522,11 +559,11 @@ class EmbarkController {
       if (err) {
         engine.logger.error(__("Error generating the UI: "));
         engine.logger.error(err.message || err);
-        process.exit(1);
       }
       engine.logger.info(__("finished generating the UI").underline);
       engine.logger.info(__("To see the result, execute {{cmd}} and go to /{{contract}}.html", {cmd: 'embark run'.underline, contract: options.contract}));
-      process.exit(0);
+
+      process.exit(err ? 1 : 0);
     });
   }
 
@@ -565,12 +602,19 @@ class EmbarkController {
           callback();
         });
       },
+      function (callback) {
+        engine.startService("libraryManager").installAll((err) => {
+          if (err) {
+            return callback(err);
+          }
+          callback();
+        });
+      },
       function startServices(callback) {
 
         engine.startService("web3");
         engine.startService("processManager");
         engine.startService("serviceMonitor");
-        engine.startService("libraryManager");
         engine.startService("codeRunner");
         engine.startService("pipeline");
         engine.startService("deployment");
@@ -653,10 +697,17 @@ class EmbarkController {
       function initEngine(callback) {
         engine.init({}, callback);
       },
+      function (callback) {
+        engine.startService("libraryManager").installAll((err) => {
+          if (err) {
+            return callback(err);
+          }
+          callback();
+        });
+      },
       function startServices(callback) {
         engine.startService("web3", {wait: true, node: options.node});
         engine.startService("processManager");
-        engine.startService("libraryManager");
         engine.startService("codeRunner");
         engine.startService("deployment", {
           trackContracts: false,
