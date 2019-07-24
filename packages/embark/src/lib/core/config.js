@@ -280,16 +280,17 @@ Config.prototype._getFileOrObject = function(object, filePath, property) {
   return dappPath(object, filePath);
 };
 
-/*eslint complexity: ["error", 30]*/
+/*eslint complexity: ["error", 34]*/
 Config.prototype.loadBlockchainConfigFile = function() {
   const blockchainDefaults = getBlockchainDefaults(this.env);
   const configFilePath = this._getFileOrObject(this.configDir, 'blockchain', 'blockchain');
 
   const userConfig = this._loadConfigFile(configFilePath, blockchainDefaults, true);
   const envConfig = userConfig[this.env];
-
+  
   if (envConfig) {
-    if (envConfig.ethereumClientName || envConfig.hasOwnProperty('isDev') || envConfig.hasOwnProperty('mineWhenNeeded')) {
+    const isCustomBlockchain = ![constants.blockchain.clients.geth, constants.blockchain.clients.parity].includes(envConfig.client);
+    if (envConfig.ethereumClientName || (!isCustomBlockchain && envConfig.hasOwnProperty('isDev')) || envConfig.hasOwnProperty('mineWhenNeeded')) {
       this.logger.error(__('The blockchain config has changed quite a bit in Embark 5\nPlease visit %s to know what has to be changed', embark5ChangesUrl.underline));
       process.exit(1);
     }
@@ -302,7 +303,14 @@ Config.prototype.loadBlockchainConfigFile = function() {
       case 'auto': envConfig.isDev = false; envConfig.mineWhenNeeded = true; break;
       case 'always': envConfig.isDev = false; envConfig.mineWhenNeeded = false;  envConfig.mine = true; break;
       case 'off': envConfig.isDev = false; envConfig.mineWhenNeeded = false;  envConfig.mine = false; break;
-      default: envConfig.isDev = false;
+      default: {
+        if (!isCustomBlockchain) {
+          envConfig.isDev = false;
+        }
+      }
+    }
+    if (isCustomBlockchain && envConfig.isDev === undefined) {
+      envConfig.isDev = this.env === "development";
     }
     if (envConfig.cors) {
       const autoIndex = envConfig.cors.indexOf('auto');

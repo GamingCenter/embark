@@ -16,15 +16,15 @@ const safePush = function(set, value) {
 class ParityClient {
 
   constructor(options) {
-    this.DEFAULTS = {
-      "BIN": "parity",
-      "VERSIONS_SUPPORTED": ">=2.0.0",
-      "NETWORK_TYPE": "dev",
-      "NETWORK_ID": 17,
-      "RPC_API": ["web3", "eth", "pubsub", "net", "parity", "private", "parity_pubsub", "traces", "rpc", "shh", "shh_pubsub"],
-      "WS_API": ["web3", "eth", "pubsub", "net", "parity", "private", "parity_pubsub", "traces", "rpc", "shh", "shh_pubsub"],
-      "DEV_WS_API": ["web3", "eth", "pubsub", "net", "parity", "private", "parity_pubsub", "traces", "rpc", "shh", "shh_pubsub", "personal"],
-      "TARGET_GAS_LIMIT": 8000000,
+    this.defaults = {
+      "bin": "parity",
+      "versionsSupported": ">=2.0.0",
+      "networkType": "dev",
+      "networkId": 17,
+      "rpcApi": ["web3", "eth", "pubsub", "net", "parity", "private", "parity_pubsub", "traces", "rpc", "shh", "shh_pubsub"],
+      "wsApi": ["web3", "eth", "pubsub", "net", "parity", "private", "parity_pubsub", "traces", "rpc", "shh", "shh_pubsub"],
+      "devWsApi": ["web3", "eth", "pubsub", "net", "parity", "private", "parity_pubsub", "traces", "rpc", "shh", "shh_pubsub", "personal"],
+      "targetGasLimit": 8000000,
       "DEV_ACCOUNT": "0x00a329c0648769a73afac7f9381e08fb43dbea72",
       "DEV_WALLET": {
         "id": "d9460e00-6895-8f58-f40c-bb57aebe6c00",
@@ -44,19 +44,19 @@ class ParityClient {
     };
     this.env = options && options.hasOwnProperty('env') ? options.env : 'development';
     this.isDev = options && options.hasOwnProperty('isDev') ? options.isDev : (this.env === 'development');
-    let defaultWsApi = this.DEFAULTS.WS_API;
+    let defaultWsApi = this.defaults.wsApi;
     if (this.isDev) {
-      defaultWsApi = this.DEFAULTS.DEV_WS_API;
+      defaultWsApi = this.defaults.devWsApi;
     }
     this.config = options && options.hasOwnProperty('config') ? options.config : {};
-    this.config.networkType = this.config.networkType || this.DEFAULTS.NETWORK_TYPE;
-    this.config.networkId = this.config.networkId || this.DEFAULTS.NETWORK_ID;
-    this.config.rpcApi = this.config.rpcApi || this.DEFAULTS.RPC_API;
+    this.config.networkType = this.config.networkType || this.defaults.networkType;
+    this.config.networkId = this.config.networkId || this.defaults.networkId;
+    this.config.rpcApi = this.config.rpcApi || this.defaults.rpcApi;
     this.config.wsApi = this.config.wsApi || defaultWsApi;
     this.name = constants.blockchain.clients.parity;
     this.prettyName = "Parity-Ethereum (https://github.com/paritytech/parity-ethereum)";
-    this.bin = this.config.ethereumClientBin || this.DEFAULTS.BIN;
-    this.versSupported = this.DEFAULTS.VERSIONS_SUPPORTED;
+    this.bin = this.config.ethereumClientBin || this.defaults.bin;
+    this.versSupported = this.defaults.versionsSupported;
   }
 
   isReady(data) {
@@ -296,7 +296,7 @@ class ParityClient {
 
   createDevAccount(keysDataDir, cb) {
     const devAccountWallet = keysDataDir + '/dev.wallet';
-    fs.writeFile(devAccountWallet, JSON.stringify(this.DEFAULTS.DEV_WALLET), function(err) {
+    fs.writeFile(devAccountWallet, JSON.stringify(this.defaults.DEV_WALLET), function(err) {
       if (err) {
         return cb(err);
       }
@@ -373,7 +373,7 @@ class ParityClient {
       },
       function accountToUnlock(callback) {
         if (self.isDev) {
-          let unlockAddressList = self.config.unlockAddressList ? self.config.unlockAddressList : this.DEFAULTS.DEV_ACCOUNT;
+          let unlockAddressList = self.config.unlockAddressList ? self.config.unlockAddressList : this.defaults.DEV_ACCOUNT;
           args.push("--unlock=" + unlockAddressList);
           return callback(null, "--unlock=" + unlockAddressList);
         }
@@ -395,8 +395,8 @@ class ParityClient {
           return callback(null, "--gas-floor-target=" + config.targetGasLimit);
         }
         // Default Parity gas limit is 4700000: let's set to the geth default
-        args.push("--gas-floor-target=" + this.DEFAULTS.TARGET_GAS_LIMIT);
-        return callback(null, "--gas-floor-target=" + this.DEFAULTS.TARGET_GAS_LIMIT);
+        args.push("--gas-floor-target=" + this.defaults.targetGasLimit);
+        return callback(null, "--gas-floor-target=" + this.defaults.targetGasLimit);
       }
     ], function(err) {
       if (err) {

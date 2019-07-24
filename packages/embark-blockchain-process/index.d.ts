@@ -43,23 +43,20 @@ declare module "embark-blockchain-process" {
     config: Config;
     env: Environment;
     isDev: boolean;
-  }
-
-  export interface BlockchainClientDefaults {
-    BIN: string;
-    VERSIONS_SUPPORTED: string;
-    NETWORK_TYPE: string;
-    RPC_API: Array<string>;
-    WS_API: Array<string>;
-    DEV_WS_API: Array<string>;
-    NETWORK_ID: number;
-    TARGET_GAS_LIMIT?: number;
-  }
-
-  export interface Overrides {
     name: string;
     prettyName: string;
     defaults: BlockchainClientDefaults;
     versSupported: string;
+  }
+
+  export interface BlockchainClientDefaults {
+    bin: string;
+    versionsSupported: string;
+    networkType?: string;
+    rpcApi: Array<string>;
+    wsApi: Array<string>;
+    devWsApi: Array<string>;
+    networkId?: number;
+    targetGasLimit?: number;
   }
 }

@@ -1,15 +1,15 @@
 import { Callback, Environment } from "embark";
-import { BaseBlockchainClientOptions, BlockchainClientDefaults, Config, Overrides } from "../index";
+import { BaseBlockchainClientOptions, BlockchainClientDefaults, Config } from "../index";
 const semver = require("semver");
 
 const NOT_IMPLEMENTED_EXCEPTION = "This method has not been implemented";
 
-// const DEFAULTS = {
-//   BIN: "", // binary for blockchain client, ie "geth", "parity", "lightchain"
-//   DEV_WS_API: [], // WS API methods to support when in development ['eth', 'web3', 'net', 'debug', 'pubsub', 'personal']
-//   RPC_API: [], // RPC API methods to support, ie ['eth', 'web3', 'net', 'debug', 'personal'],
-//   VERSIONS_SUPPORTED: "", // mimimum client version supported, ie ">=1.3.0"
-//   WS_API: [], // WS API methods to support, ie ['eth', 'web3', 'net', 'debug', 'pubsub', 'personal'],
+// const defaults = {
+//   bin: "", // binary for blockchain client, ie "geth", "parity", "lightchain"
+//   devWsApi: [], // WS API methods to support when in development ['eth', 'web3', 'net', 'debug', 'pubsub', 'personal']
+//   rpcApi: [], // RPC API methods to support, ie ['eth', 'web3', 'net', 'debug', 'personal'],
+//   versionsSupported: "", // mimimum client version supported, ie ">=1.3.0"
+//   wsApi: [], // WS API methods to support, ie ['eth', 'web3', 'net', 'debug', 'pubsub', 'personal'],
 // };
 
 const VERSION_REGEX = /Version: ([0-9]\.[0-9]\.[0-9]).*?/; // Regex used to parse the version from the version command (returned from determineVersionCommand())
@@ -24,41 +24,44 @@ export class BaseBlockchainClient {
   protected env: Environment;
   protected isDev: boolean;
 
-  public DEFAULTS: BlockchainClientDefaults = {
-    BIN: "", // binary for blockchain client, ie "geth", "parity", "lightchain"
-    DEV_WS_API: [], // WS API methods to support when in development ['eth', 'web3', 'net', 'debug', 'pubsub', 'personal']
-    NETWORK_ID: 1,
-    NETWORK_TYPE: "custom",
-    RPC_API: [], // RPC API methods to support, ie ['eth', 'web3', 'net', 'debug', 'personal'],
-    VERSIONS_SUPPORTED: "", // mimimum client version supported, ie ">=1.3.0"
-    WS_API: [], // WS API methods to support, ie ['eth', 'web3', 'net', 'debug', 'pubsub', 'personal'],
+  public defaults: BlockchainClientDefaults = {
+    bin: "", // binary for blockchain client, ie "geth", "parity", "lightchain"
+    devWsApi: [], // WS API methods to support when in development ['eth', 'web3', 'net', 'debug', 'pubsub', 'personal']
+    networkType: "custom",
+    rpcApi: [], // RPC API methods to support, ie ['eth', 'web3', 'net', 'debug', 'personal'],
+    versionsSupported: "", // mimimum client version supported, ie ">=1.3.0"
+    wsApi: [], // WS API methods to support, ie ['eth', 'web3', 'net', 'debug', 'pubsub', 'personal'],
   };
   public name: string = "baseclient";
   public prettyName: string = "Base blockchain client";
-  public versSupported: string = ">=0.0.1";
+  public versSupported: string = ">=0.0.1"; // mimimum client version supported, ie ">=1.3.0"
 
-  constructor(options: BaseBlockchainClientOptions, overrides: Overrides) {
+  constructor(options: BaseBlockchainClientOptions) {
     this.env = options.env || "development";
     this.isDev = options.isDev || (this.env === "development");
 
     this.config = options.config as Config;
-    this.DEFAULTS = overrides.defaults;
-    let defaultWsApi = this.DEFAULTS.WS_API;
+    this.defaults = options.defaults;
+    let defaultWsApi = this.defaults.wsApi;
     if (this.isDev) {
-      defaultWsApi = this.DEFAULTS.DEV_WS_API;
+      defaultWsApi = this.defaults.devWsApi;
     }
-    this.config.networkType = this.config.networkType || this.DEFAULTS.NETWORK_TYPE;
-    this.config.networkId = this.config.networkId || this.DEFAULTS.NETWORK_ID;
-    this.config.rpcApi = this.config.rpcApi || this.DEFAULTS.RPC_API;
+    if (this.defaults.networkType) {
+      this.config.networkType = this.config.networkType || this.defaults.networkType;
+    }
+    if (this.defaults.networkId) {
+      this.config.networkId = this.config.networkId || this.defaults.networkId;
+    }
+    this.config.rpcApi = this.config.rpcApi || this.defaults.rpcApi;
     this.config.wsApi = this.config.wsApi || defaultWsApi;
 
-    this.name = overrides.name;
-    this.prettyName = overrides.prettyName;
-    this.versSupported = overrides.versSupported;
+    this.name = options.name;
+    this.prettyName = options.prettyName;
+    this.versSupported = options.versSupported;
   }
 
   get bin() {
-    return this.config.ethereumClientBin || this.DEFAULTS.BIN;
+    return this.config.ethereumClientBin || this.defaults.bin;
   }
 
   //#region Overriden Methods
