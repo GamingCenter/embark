@@ -488,7 +488,7 @@ export function BlockchainClient(userConfig, options) {
       // check for blockchain plugins
       const blockchainPlugins = options.blockchainPlugins;
       if(!blockchainPlugins || !blockchainPlugins.length) {
-        console.error(__('Unknown client "%s". Please use one of the following: %s', userConfig.client, Object.keys(constants.blockchain.clients).join(', ')));
+        console.error(__('Unknown client "%s". Please use one of the following: %s. Alternatively, a blockchain client plugin may exist for "%s"', userConfig.client, Object.keys(constants.blockchain.clients).join(', '), userConfig.client));
         process.exit(1);
       }
       const blockchainPlugin = blockchainPlugins[0];
