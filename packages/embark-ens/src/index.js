@@ -436,7 +436,6 @@ class ENS {
       return (namesConfig.provider === 'ens' && namesConfig.enabled === true);
     };
 
-    console.log('SETTING ENS');
     // TODO This stacks the setProviders making it so that we call it multiple times
     this.embark.addProviderInit('names', code, shouldInit);
     this.embark.addConsoleProviderInit('names', code, shouldInit);
